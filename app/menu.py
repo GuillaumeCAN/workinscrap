@@ -11,22 +11,15 @@
 #  © Guillaume CANCALON – All rights reserved.
 # ==============================================================================
 
-from app.browser import start_browser, login
-from app.menu import show_title
+from pyfiglet import Figlet
+from rich.console import Console, Group
 
+from app.config import APP_NAME, AUTHOR
 
-def main():
-    driver = start_browser()
-    show_title()
-    try:
-        if login(driver):
-            print("➡️ Connexion réussie, on continue...")
-        else:
-            print("🚫 Connexion échouée. Arrêt du script.")
+console = Console()
 
-    finally:
-        input("Press enter key to exit...")
-        driver.quit()
+def show_title():
+    f = Figlet(font="slant")
+    ascii_art = f.renderText(APP_NAME)
+    console.print(f"[bold cyan]{ascii_art}[/bold cyan]")
 
-if __name__ == "__main__":
-    main()
