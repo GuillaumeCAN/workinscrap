@@ -12,20 +12,25 @@
 # ==============================================================================
 
 from app.browser import start_browser, login
-from app.menu import show_title
+from app.menu import menu, show_title
+from rich.console import Console
 
+console = Console()
 
 def main():
     driver = start_browser()
-    show_title()
+    connected = False
+    show_title(driver, connected)
     try:
         if login(driver):
-            print("➡️ Connexion réussie, on continue...")
+            connected = True
+            console.clear()
+            show_title(driver, connected)
+            menu(driver, connected)
         else:
-            print("🚫 Connexion échouée. Arrêt du script.")
+            print("🚫 Login failed... exiting script")
 
     finally:
-        input("Press enter key to exit...")
         driver.quit()
 
 if __name__ == "__main__":

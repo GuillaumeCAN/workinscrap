@@ -12,7 +12,6 @@
 # ==============================================================================
 
 from selenium import webdriver
-import getpass
 from rich.prompt import Prompt
 
 from selenium.webdriver.common.by import By
