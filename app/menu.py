@@ -11,7 +11,6 @@
 #  © Guillaume CANCALON – All rights reserved.
 # ==============================================================================
 
-from pyfiglet import Figlet
 from rich.console import Console
 from prompt_toolkit import Application
 from prompt_toolkit.key_binding import KeyBindings
@@ -21,32 +20,12 @@ from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.styles import Style
 from prompt_toolkit.output import ColorDepth
 from prompt_toolkit.layout.containers import VSplit
-from rich.padding import Padding
-from selenium.webdriver.common.by import By
-from app.config import APP_NAME, AUTHOR, USER_NAME, USER_TIME_SPENT
-from app.browser import login
+
+from app.config import APP_NAME, AUTHOR
+from app.ui import show_title
+from app.submenus import idling
 
 console = Console()
-
-def show_title(driver=None, connected=False):
-    f = Figlet(font="slant")
-    ascii_art = f.renderText(APP_NAME)
-    console.clear()
-    console.print(f"[bold cyan]{ascii_art}[/bold cyan]")
-    console.print(Padding(f"[italic white]Coded by {AUTHOR}[/italic white]", (0, 0, 0, 4)))
-
-    if connected and driver is not None:
-        try:
-            user_name = driver.find_element(By.XPATH, USER_NAME).text
-            # time_spent = driver.find_element(By.XPATH, USER_TIME_SPENT).text
-            console.print(Padding(f"[purple]Connected as {user_name}[/purple]", (0, 0, 0, 4)))
-            # console.print(Padding(f"[purple]Time spent on WorkinLive : {time_spent}[/purple]", (0, 0, 0, 4)))
-        except Exception as e:
-            console.print(Padding(f"[red]Failed to fetch user info: {e}[/red]", (0, 0, 0, 4)))
-    else:
-        console.print(Padding(f"[red]Not connected...[/red]", (0, 0, 0, 4)))
-
-    console.rule()
 
 MENU_OPTIONS = [
     "Idling account for fake time",
@@ -119,19 +98,6 @@ class Menu:
     def run(self):
         return self.app.run()
 
-def hide_cursor():
-    print("\033[?25l", end="", flush=True)
-
-def show_cursor():
-    print("\033[?25h", end="", flush=True)
-
-def wait_for_enter():
-    try:
-        hide_cursor()
-        input()
-    finally:
-        show_cursor()
-
 def handle_selection(index, driver=None, connected=False):
     console.clear()
     show_title(driver, connected)
@@ -139,20 +105,19 @@ def handle_selection(index, driver=None, connected=False):
     option = MENU_OPTIONS[index]
 
     if option == "Idling account for fake time":
-        console.print("[bold green]→ Idling account started...[/bold green]")
+        idling(driver, connected)
     elif option == "Start scraping and filling exercises":
         console.print("[bold yellow]→ Starting scraping and filling exercises...[/bold yellow]")
+        input("Press Enter to return to main menu...")
     elif option == "About WorkinScrap":
         console.print(f"[bold magenta]{APP_NAME} est une application éducative.[/bold magenta]")
         console.print(f"Auteur : {AUTHOR}")
+        input("Press Enter to return to main menu...")
     elif option == "Quit the script":
         console.print("[bold red]→ Exiting script...[/bold red]")
         driver.quit()
         console.clear()
         exit()
-
-    console.print("\n[dim]Appuie sur Entrée pour revenir au menu...[/dim]")
-    wait_for_enter()
 
     console.clear()
     show_title(driver, connected)
@@ -165,5 +130,3 @@ def menu(driver=None, connected=False):
             console.print("[bold red]→ Menu quitté.[/bold red]")
             break
         handle_selection(selected, driver, connected)
-
-
