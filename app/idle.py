@@ -67,7 +67,7 @@ def start_idling(driver):
                     EC.presence_of_element_located((By.XPATH, USER_TIME_SPENT))
                 )
                 time_spent = driver.find_element(By.XPATH, USER_TIME_SPENT).text
-                log.debug(f"Page refreshed, time spent: {time_spent}")
+                log.debug(f"Page refreshed, time spent on WIL: {time_spent}")
             except Exception as e:
                 log.error(f"ERROR: {e}")
             time.sleep(60)

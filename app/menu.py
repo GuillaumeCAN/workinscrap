@@ -110,8 +110,15 @@ def handle_selection(index, driver=None, connected=False):
         console.print("[bold yellow]→ Starting scraping and filling exercises...[/bold yellow]")
         input("Press Enter to return to main menu...")
     elif option == "About WorkinScrap":
-        console.print(f"{APP_NAME} est une application éducative.")
-        console.print(f"[bold magenta]Auteur : {AUTHOR}[/bold magenta]")
+
+        console.print(f"[cyan]{APP_NAME}[/cyan] is an application for educational purposes only;\n")
+        console.print("it is in [bold]no way designed to cheat or falsify results.[/bold]")
+        console.print("This project's sole purpose is to improve programming and web scraping skills.")
+        console.print("I dissociate myself from any use for cheating purposes.")
+        console.print("This project is coded in Python 3.12 and uses Selenium as well as API requests to Gemini AI.\n")
+
+        console.print(f"[magenta]Best regards - [bold]{AUTHOR}[/bold][/magenta]")
+
         input("Press Enter to return to main menu...")
     elif option == "Quit the script":
         console.print("[bold red]→ Exiting script...[/bold red]")

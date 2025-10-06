@@ -23,6 +23,7 @@ import time
 import threading
 
 from app import idle, log
+from app.ui.ui import show_title
 
 def idling(driver=None, connected=False):
     options = ["Toggle Idling", "Return to Main Menu"]  # Placeholder list

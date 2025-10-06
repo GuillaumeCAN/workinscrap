@@ -1,5 +1,6 @@
 APP_NAME = "WorkinScrap"
 AUTHOR = "blizzarr"
+VERSION = "1.0.3"
 
 LOGIN_URL = "https://www.workinlive.school/login"
 
