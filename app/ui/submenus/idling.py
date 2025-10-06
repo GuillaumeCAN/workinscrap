@@ -19,6 +19,8 @@ from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.styles import Style
 from prompt_toolkit.output import ColorDepth
 from prompt_toolkit.widgets import Frame
+import time
+import threading
 
 from app import idle, log
 
@@ -101,6 +103,13 @@ def idling(driver=None, connected=False):
         app.invalidate()
 
     log.set_log_callback(ui_log_callback)
+
+    def update_status_loop():
+        while True:
+            time.sleep(1)
+            app.invalidate()
+
+    threading.Thread(target=update_status_loop, daemon=True).start()
 
     result = app.run()
     return result

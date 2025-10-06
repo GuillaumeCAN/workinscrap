@@ -17,6 +17,7 @@ import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from datetime import datetime
 
 from app.config import USER_TIME_SPENT
 from app import log
@@ -24,24 +25,29 @@ from app.browser import check_login
 
 console = Console()
 idling_status = False
+idling_start_time = None
 
 def is_idling():
     return idling_status
 
 def get_status_text():
-    if idling_status:
-        return [("class:status_green", "  🟩 Now idling...")]
+    if idling_status and idling_start_time:
+        elapsed = datetime.now() - idling_start_time
+        elapsed_str = str(elapsed).split(".")[0]
+        return [("class:status_green", f"  🟩 Now idling...(current session : {elapsed_str})")]
     else:
         return [("class:status_red", "  🔴 Idling stopped.")]
 
 def toggle_idling(driver=None):
-    global idling_status, idling_thread
+    global idling_status, idling_thread, idling_start_time
     if not idling_status:
         idling_status = True
+        idling_start_time = datetime.now()
         idling_thread = threading.Thread(target=start_idling, args=(driver,), daemon=True)
         idling_thread.start()
     else:
         idling_status = False
+        idling_start_time = None
 
 def start_idling(driver):
     global idling_status
