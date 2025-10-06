@@ -22,8 +22,8 @@ from prompt_toolkit.output import ColorDepth
 from prompt_toolkit.layout.containers import VSplit
 
 from app.config import APP_NAME, AUTHOR
-from app.ui import show_title
-from app.submenus import idling
+from app.ui.ui import show_title
+from app.ui.submenus.idling import idling
 
 console = Console()
 
@@ -110,8 +110,8 @@ def handle_selection(index, driver=None, connected=False):
         console.print("[bold yellow]→ Starting scraping and filling exercises...[/bold yellow]")
         input("Press Enter to return to main menu...")
     elif option == "About WorkinScrap":
-        console.print(f"[bold magenta]{APP_NAME} est une application éducative.[/bold magenta]")
-        console.print(f"Auteur : {AUTHOR}")
+        console.print(f"{APP_NAME} est une application éducative.")
+        console.print(f"[bold magenta]Auteur : {AUTHOR}[/bold magenta]")
         input("Press Enter to return to main menu...")
     elif option == "Quit the script":
         console.print("[bold red]→ Exiting script...[/bold red]")

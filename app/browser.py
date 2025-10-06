@@ -13,6 +13,7 @@
 
 from selenium import webdriver
 from rich.prompt import Prompt
+from selenium.common import NoSuchElementException
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -50,4 +51,11 @@ def login(driver):
     except Exception as e:
         print("❌ Login failed")
         print(f"Error message: {e}")
+        return False
+
+def check_login(driver):
+    try:
+        driver.find_element(By.XPATH, SUCCESS_ELEMENT_SELECTOR)
+        return True
+    except NoSuchElementException:
         return False

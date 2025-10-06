@@ -18,35 +18,43 @@ from prompt_toolkit.layout import Layout, HSplit, VSplit, Window
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.styles import Style
 from prompt_toolkit.output import ColorDepth
+from prompt_toolkit.widgets import Frame
+
+from app import idle, log
 
 def idling(driver=None, connected=False):
-    options = ["Start Idling", "Stop Idling", "Return to Main Menu"]
-    nonlocal_vars = {"selected": 0, "idling_status": False}
+    options = ["Toggle Idling", "Return to Main Menu"]  # Placeholder list
+    nonlocal_vars = {"selected": 0}
 
     def get_menu_text():
+        current_action = "Stop Idling" if idle.is_idling() else "Start Idling"
+        dynamic_options = [current_action, "Return to Main Menu"]
         result = []
-        for i, option in enumerate(options):
+        for i, option in enumerate(dynamic_options):
             prefix = "> " if i == nonlocal_vars["selected"] else "  "
             style = "class:selected" if i == nonlocal_vars["selected"] else "class:menu"
             result.append((style, f"  {prefix}{option}\n"))
         return result
 
-    def get_status_text():
-        if nonlocal_vars["idling_status"]:
-            return [("class:status_green", "  🟩 Now idling...")]
-        else:
-            return [("class:status_red", "  🔴 Idling stopped.")]
-
     menu_control = FormattedTextControl(get_menu_text)
-    status_control = FormattedTextControl(get_status_text)
+    status_control = FormattedTextControl(idle.get_status_text)
+    log_control = FormattedTextControl(log.get_log_text)
 
     menu_window = Window(content=menu_control, always_hide_cursor=True)
     status_window = Window(height=1, content=status_control)
 
+    log_window = Window(content=log_control, wrap_lines=True)
+    log_frame = Frame(
+        body=log_window,
+        title="📑 LOGS",
+        style="class:frame"
+    )
+
     root_container = HSplit([
         status_window,
         Window(height=1, char=" "),
-        VSplit([Window(width=4, char=" "), menu_window])
+        VSplit([Window(width=4, char=" "), menu_window]),
+        log_frame
     ])
 
     kb = KeyBindings()
@@ -66,20 +74,21 @@ def idling(driver=None, connected=False):
     @kb.add("enter")
     def enter(event):
         choice = nonlocal_vars["selected"]
-        if choice == len(options) - 1:
+        if choice == 1:  # "Return to Main Menu"
             event.app.exit(result=None)
         else:
-            if choice == 0:
-                nonlocal_vars["idling_status"] = True
-            elif choice == 1:
-                nonlocal_vars["idling_status"] = False
+            # Toggle idling status
+            idle.toggle_idling(driver)
+            menu_control.text = get_menu_text()
             event.app.invalidate()
 
     style = Style.from_dict({
         "menu": "bold white bg:default",
         "selected": "bold cyan bg:default",
         "status_green": "bold green",
-        "status_red": "bold red"
+        "status_red": "bold red",
+        "frame.label" : "bg:#444444 #ffffff bold",
+        "frame.border": "#888888"
     })
 
     app = Application(layout=Layout(root_container),
@@ -87,6 +96,11 @@ def idling(driver=None, connected=False):
                       style=style,
                       full_screen=False,
                       color_depth=ColorDepth.TRUE_COLOR)
+
+    def ui_log_callback(_message):
+        app.invalidate()
+
+    log.set_log_callback(ui_log_callback)
 
     result = app.run()
     return result
