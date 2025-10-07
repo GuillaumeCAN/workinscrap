@@ -2,6 +2,8 @@ APP_NAME = "WorkinScrap"
 AUTHOR = "blizzarr"
 VERSION = "1.0.3"
 
+GITHUB_REPO = "https://github.com/GuillaumeCAN/workinscrap"
+
 LOGIN_URL = "https://www.workinlive.school/login"
 
 USERNAME_SELECTOR = "/html/body/div/div/div/div/div[2]/form/div[1]/div/input"

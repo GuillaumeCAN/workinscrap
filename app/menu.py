@@ -24,6 +24,7 @@ from prompt_toolkit.layout.containers import VSplit
 from app.config import APP_NAME, AUTHOR
 from app.ui.ui import show_title
 from app.ui.submenus.idling import idling
+from app.ui.submenus.about import about
 from app.get_user import get_course_list
 
 console = Console()
@@ -49,7 +50,7 @@ class Menu:
             layout=Layout(
                 HSplit([
                     VSplit([
-                        Window(width=4, char=" "),  # padding gauche
+                        Window(width=4, char=" "),
                         self.window,
                     ])
                 ])
@@ -111,17 +112,7 @@ def handle_selection(index, driver=None, connected=False):
         print(get_course_list(driver, connected))
         input("Press Enter to return to main menu...")
     elif option == "About WorkinScrap":
-
-        console.print(f"[cyan]{APP_NAME}[/cyan] is an application for educational purposes only;\n")
-        console.print("it is in [bold]no way designed to cheat or falsify results.[/bold]")
-        console.print("This project's sole purpose is to improve programming and web scraping skills.")
-        console.print("I dissociate myself from any use for cheating purposes.")
-        console.print("This project is coded in Python 3.12 and uses Selenium as well as API requests to Gemini AI.\n")
-
-        console.print(f"[magenta]Best regards - [bold]{AUTHOR}[/bold][/magenta]")
-        console.print("PS: je cherche toujours une alternance pitié 🙏")
-
-        input("Press Enter to return to main menu...")
+        about(driver, connected)
     elif option == "Quit the script":
         console.print("[bold red]→ Exiting script...[/bold red]")
         driver.quit()
@@ -136,6 +127,6 @@ def menu(driver=None, connected=False):
         menu = Menu(MENU_OPTIONS)
         selected = menu.run()
         if selected is None:
-            console.print("[bold red]→ Menu quitté.[/bold red]")
+            console.print("[bold red]→ Quitting menu.[/bold red]")
             break
         handle_selection(selected, driver, connected)

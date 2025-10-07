@@ -11,7 +11,6 @@
 #  © Guillaume CANCALON – All rights reserved.
 # ==============================================================================
 
-
 from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import Layout, HSplit, VSplit, Window
@@ -47,17 +46,21 @@ def idling(driver=None, connected=False):
     status_window = Window(height=1, content=status_control)
 
     log_window = Window(content=log_control, wrap_lines=True)
-    log_frame = Frame(
-        body=log_window,
-        title="📑 LOGS",
-        style="class:frame"
-    )
+    log_frame = VSplit([
+        Window(width=4, char=" "),
+        Frame(
+            body=log_window,
+            title="📑 LOGS",
+            style="class:frame"
+        )
+    ])
 
     root_container = HSplit([
         status_window,
         Window(height=1, char=" "),
-        VSplit([Window(width=4, char=" "), menu_window]),
-        log_frame
+        log_frame,
+        Window(height=1, char=" "),
+        VSplit([Window(width=4, char=" "), menu_window])
     ])
 
     kb = KeyBindings()
