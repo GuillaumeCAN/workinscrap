@@ -24,6 +24,7 @@ from prompt_toolkit.layout.containers import VSplit
 from app.config import APP_NAME, AUTHOR
 from app.ui.ui import show_title
 from app.ui.submenus.idling import idling
+from app.get_user import get_course_list
 
 console = Console()
 
@@ -107,7 +108,7 @@ def handle_selection(index, driver=None, connected=False):
     if option == "Idling account for fake time":
         idling(driver, connected)
     elif option == "Start scraping and filling exercises":
-        console.print("[bold yellow]→ Starting scraping and filling exercises...[/bold yellow]")
+        print(get_course_list(driver, connected))
         input("Press Enter to return to main menu...")
     elif option == "About WorkinScrap":
 
@@ -118,6 +119,7 @@ def handle_selection(index, driver=None, connected=False):
         console.print("This project is coded in Python 3.12 and uses Selenium as well as API requests to Gemini AI.\n")
 
         console.print(f"[magenta]Best regards - [bold]{AUTHOR}[/bold][/magenta]")
+        console.print("PS: je cherche toujours une alternance pitié 🙏")
 
         input("Press Enter to return to main menu...")
     elif option == "Quit the script":

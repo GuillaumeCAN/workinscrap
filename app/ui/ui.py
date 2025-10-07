@@ -5,7 +5,8 @@ from rich.console import Console
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from app.config import APP_NAME, AUTHOR, USER_NAME, USER_TIME_SPENT
+from app.config import APP_NAME, AUTHOR, VERSION
+from app.get_user import get_user_name, get_user_time_spent
 from app.idle import is_idling
 
 console = Console()
@@ -16,14 +17,14 @@ def show_title(driver=None, connected=False):
     console.clear()
     console.print(f"[bold cyan]{ascii_art}[/bold cyan]")
     console.print(Padding(f"[italic white]Coded by {AUTHOR}[/italic white]", (0, 0, 0, 4)))
+    console.print(Padding(f"\n[italic cyan]Why study, when you can scrape? - {APP_NAME} v{VERSION}[/italic cyan]\n", (0, 0, 0, 6)))
+
 
     if connected and driver is not None:
         try:
-            user_name = driver.find_element(By.XPATH, USER_NAME).text
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, USER_TIME_SPENT))
-            )
-            time_spent = driver.find_element(By.XPATH, USER_TIME_SPENT).text
+            user_name = get_user_name(driver, connected)
+            time_spent = get_user_time_spent(driver, connected)
+
             console.print(Padding(f"[purple]Connected as {user_name}[/purple]", (0, 0, 0, 4)))
             if is_idling():
                 console.print(Padding(f"[dodger_blue1]Time spent on WorkinLive : {time_spent}[/dodger_blue1] [green4](idling in background...)[/green4]", (0, 0, 0, 4)))
