@@ -42,7 +42,7 @@ def show_title(driver=None, connected=False):
             if is_idling():
                 console.print(Padding(f"[dodger_blue1]Time spent on WorkinLive : {time_spent}[/dodger_blue1] [green4](idling in background...)[/green4]", (0, 0, 0, 4)))
             else:
-                console.print(Padding(f"[dodger_blue1]Time spent on WorkinLive : {time_spent}[/dodger_blue1] [grey70](idling deamon not running)[/grey70]", (0, 0, 0, 4)))
+                console.print(Padding(f"[dodger_blue1]Time spent on WorkinLive : {time_spent}[/dodger_blue1] [grey70](idling daemon not running)[/grey70]", (0, 0, 0, 4)))
         except Exception as e:
             console.print(Padding(f"[red]Failed to fetch user info: {e}[/red]", (0, 0, 0, 4)))
     else:

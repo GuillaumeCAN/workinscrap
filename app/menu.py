@@ -21,11 +21,10 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.output import ColorDepth
 from prompt_toolkit.layout.containers import VSplit
 
-from app.config import APP_NAME, AUTHOR
 from app.ui.ui import show_title
 from app.ui.submenus.idling import idling
+from app.ui.submenus.scraping import scraping
 from app.ui.submenus.about import about
-from app.get_user import get_course_list
 
 console = Console()
 
@@ -109,8 +108,7 @@ def handle_selection(index, driver=None, connected=False):
     if option == "Idling account for fake time":
         idling(driver, connected)
     elif option == "Start scraping and filling exercises":
-        print(get_course_list(driver, connected))
-        input("Press Enter to return to main menu...")
+        scraping(driver, connected)
     elif option == "About WorkinScrap":
         about(driver, connected)
     elif option == "Quit the script":
