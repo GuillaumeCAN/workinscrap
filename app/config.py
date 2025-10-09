@@ -17,4 +17,4 @@ USER_NAME = "/html/body/div/div/header/div[1]/div/ul/li[3]/div/span"
 USER_TIME_SPENT = "/html/body/div/div/div/main/section/div/div/div/div[1]/div/div/div[1]/div/div/div/div[2]/div[1]/strong"
 COURSE_LIST_UL = "/html/body/div/div/div/main/section/div/div/div/div[1]/div/ul"
 
-API_KEY = "AIzaSyAtmI822ttw6a27-FxWTfgS8yXBtWMB1bw"
+API_KEY = ""
