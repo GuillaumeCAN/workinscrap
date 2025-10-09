@@ -22,6 +22,7 @@ import time
 import threading
 
 from app import scrap, log
+from app.scrap import api_key_status
 
 
 def scraping(driver=None, connected=False):
@@ -48,10 +49,12 @@ def scraping(driver=None, connected=False):
     menu_control = FormattedTextControl(get_menu_text)
     status_control = FormattedTextControl(scrap.get_status_text)
     warn_status_text = FormattedTextControl(scrap.warn_status_text)
+    api_key_status = FormattedTextControl(scrap.api_key_status)
     courses_list = FormattedTextControl(scrap.get_courses(driver, connected))
     log_control = FormattedTextControl(log.get_log_text)
 
     menu_window = Window(content=menu_control, always_hide_cursor=True)
+    api_key_window = Window(content=api_key_status, always_hide_cursor=True)
     status_window = Window(height=1, content=status_control)
     warn_status_window = Window(height=2, content=warn_status_text)
     courses_window = Window(content=courses_list, always_hide_cursor=True)
@@ -69,6 +72,7 @@ def scraping(driver=None, connected=False):
     root_container = HSplit([
         status_window,
         warn_status_window,
+        api_key_window,
         Window(height=1, char=" "),
         VSplit([Window(width=4, char=" "), courses_window]),
         Window(height=1, char=" "),

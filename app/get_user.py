@@ -10,10 +10,16 @@
 #
 #  © Guillaume CANCALON – All rights reserved.
 # ==============================================================================
+import requests
 from selenium.common import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from google import genai
+from app import log
+from app.config import API_KEY
+from functools import lru_cache
+
 
 from app.config import USER_NAME, USER_TIME_SPENT, COURSE_LIST_UL
 
@@ -63,3 +69,26 @@ def get_user_time_spent(driver=None, connected=False):
             return time_spent
         except NoSuchElementException:
             return "Error while fetching user time spent..."
+
+def get_user_apikey():
+    from app.config import API_KEY
+    return bool(API_KEY)
+
+@lru_cache(maxsize=1)
+def is_api_key_valid():
+    if not API_KEY:
+        return False
+
+    try:
+        log.info("Checking if API key is valid...")
+        client = genai.Client(api_key=API_KEY)
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents="ping"
+        )
+        log.info("API key is valid !")
+        return bool(response.text)
+    except Exception as e:
+        log.error(f"Gemini API key test failed: {e}")
+        return False
