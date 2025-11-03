@@ -10,6 +10,7 @@
 #
 #  © Guillaume CANCALON – All rights reserved.
 # ==============================================================================
+
 import requests
 from selenium.common import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait

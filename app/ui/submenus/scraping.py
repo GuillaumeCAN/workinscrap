@@ -24,26 +24,26 @@ import threading
 from app import scrap, log
 from app.scrap import api_key_status
 
-
 def scraping(driver=None, connected=False):
-    options = ["Toggle Scrapping (everything)", "Select only certain courses (coming soon...)", "Return to Main Menu"]
+    # Récupère la liste des cours
+    courses = scrap.get_courses(driver, connected).split("\n")
     nonlocal_vars = {"selected": 0}
 
     def get_menu_text():
-        current_action = "Stop Scrapping" if scrap.is_scraping() else "Start Scrapping (everything)"
-        dynamic_options = [current_action, "Select only certain courses (coming soon...)", "Return to Main Menu"]
-
         result = []
-        for i, option in enumerate(dynamic_options):
-            if i == 1:  # Option désactivée
-                style = "class:disabled"
-            elif i == nonlocal_vars["selected"]:
-                style = "class:selected"
-            else:
-                style = "class:menu"
-
+        for i, course in enumerate(courses):
+            style = "class:selected" if i == nonlocal_vars["selected"] else "class:menu"
             prefix = "> " if i == nonlocal_vars["selected"] else "  "
-            result.append((style, f"  {prefix}{option}\n"))
+            result.append((style, f"  {prefix}{course}\n"))
+
+        # Option pour retourner au menu principal
+        idx_return = len(courses)
+        if nonlocal_vars["selected"] == idx_return:
+            style = "class:selected"
+        else:
+            style = "class:menu"
+        result.append((style, f"  {'> ' if nonlocal_vars['selected'] == idx_return else '  '}Return to Main Menu\n"))
+
         return result
 
     menu_control = FormattedTextControl(get_menu_text)
@@ -53,22 +53,16 @@ def scraping(driver=None, connected=False):
     courses_list = FormattedTextControl(scrap.get_courses(driver, connected))
     log_control = FormattedTextControl(log.get_log_text)
 
+    # Fenêtres inchangées
     menu_window = Window(content=menu_control, always_hide_cursor=True)
     api_key_window = Window(content=api_key_status, always_hide_cursor=True)
     status_window = Window(height=1, content=status_control)
     warn_status_window = Window(height=2, content=warn_status_text)
     courses_window = Window(content=courses_list, always_hide_cursor=True)
-
     log_window = Window(content=log_control, wrap_lines=True)
-    log_frame = VSplit([
-        Window(width=4, char=" "),
-        Frame(
-            body=log_window,
-            title="📑 LOGS",
-            style="class:frame"
-        )
-    ])
+    log_frame = VSplit([Window(width=4, char=" "), Frame(body=log_window, title="📑 LOGS", style="class:frame")])
 
+    # Conteneur racine inchangé
     root_container = HSplit([
         status_window,
         warn_status_window,
@@ -85,35 +79,25 @@ def scraping(driver=None, connected=False):
 
     @kb.add("up")
     def up(event):
-        while True:
-            nonlocal_vars["selected"] = (nonlocal_vars["selected"] - 1) % len(options)
-            if nonlocal_vars["selected"] != 1:  # Skip disabled
-                break
+        nonlocal_vars["selected"] = (nonlocal_vars["selected"] - 1) % (len(courses) + 1)
         menu_control.text = get_menu_text()
         event.app.invalidate()
 
     @kb.add("down")
     def down(event):
-        while True:
-            nonlocal_vars["selected"] = (nonlocal_vars["selected"] + 1) % len(options)
-            if nonlocal_vars["selected"] != 1:  # Skip disabled
-                break
+        nonlocal_vars["selected"] = (nonlocal_vars["selected"] + 1) % (len(courses) + 1)
         menu_control.text = get_menu_text()
         event.app.invalidate()
 
     @kb.add("enter")
     def enter(event):
         choice = nonlocal_vars["selected"]
-        if choice == 2:  # "Return to Main Menu"
+        if choice == len(courses):  # Retour au menu principal
             event.app.exit(result=None)
-            return
-
-        elif choice == 1:
-            pass  # disable
-
         else:
-            # Toggle scraping status
-            scrap.toggle_scraping(driver)
+            course_name = courses[choice]
+            log.info(f"Starting scraping for: {course_name}")
+            scrap.start_scraping(driver, [course_name])
             menu_control.text = get_menu_text()
             event.app.invalidate()
 
@@ -128,11 +112,13 @@ def scraping(driver=None, connected=False):
         "warn": "bold gold"
     })
 
-    app = Application(layout=Layout(root_container),
-                      key_bindings=kb,
-                      style=style,
-                      full_screen=False,
-                      color_depth=ColorDepth.TRUE_COLOR)
+    app = Application(
+        layout=Layout(root_container),
+        key_bindings=kb,
+        style=style,
+        full_screen=False,
+        color_depth=ColorDepth.TRUE_COLOR
+    )
 
     def ui_log_callback(_message):
         app.invalidate()
@@ -148,3 +134,5 @@ def scraping(driver=None, connected=False):
 
     result = app.run()
     return result
+
+

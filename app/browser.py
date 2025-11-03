@@ -11,21 +11,38 @@
 #  © Guillaume CANCALON – All rights reserved.
 # ==============================================================================
 
+# ==============================================================================
+#  browser.py - Selenium Firefox launcher with clean logs
+# ==============================================================================
+
 from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
+import tempfile, os
 from rich.prompt import Prompt
 from selenium.common import NoSuchElementException
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from app.config import LOGIN_URL, USERNAME_SELECTOR, PASSWORD_SELECTOR, SUBMIT_BUTTON_SELECTOR, SUCCESS_ELEMENT_SELECTOR
 
+
 def start_browser():
-    options = webdriver.ChromeOptions()
-    options.add_argument("headless")
-    options.add_experimental_option("detach", True)
-    driver = webdriver.Chrome(options=options)
+    # Crée un profil temporaire Firefox isolé
+    profile_dir = tempfile.mkdtemp(prefix="workinscrap_firefox_")
+    options = Options()
+    options.headless = True  # headless
+    options.add_argument("-profile")
+    options.add_argument(profile_dir)
+
+    # Supprime les logs inutiles de GeckoDriver
+    service = Service(log_path=os.devnull)
+
+    driver = webdriver.Firefox(service=service, options=options)
     return driver
+
+
+# ======================== LOGIN FONCTIONS ========================
 
 def login(driver):
     username = Prompt.ask("[bold yellow]Username[/bold yellow]")
@@ -52,6 +69,7 @@ def login(driver):
         print("❌ Login failed")
         print(f"Error message: {e}")
         return False
+
 
 def check_login(driver):
     try:
