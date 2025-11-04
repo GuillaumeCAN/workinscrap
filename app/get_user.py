@@ -12,7 +12,7 @@
 # ==============================================================================
 
 import requests
-from selenium.common import NoSuchElementException
+from selenium.common import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -22,7 +22,7 @@ from app.config import API_KEY
 from functools import lru_cache
 
 
-from app.config import USER_NAME, USER_TIME_SPENT, COURSE_LIST_UL
+from app.config import USER_NAME, USER_TIME_SPENT, COURSE_LIST_UL, MODULE_CARD_LIST
 
 def get_course_list(driver=None, connected=False):
     if connected and driver is not None:
@@ -32,6 +32,7 @@ def get_course_list(driver=None, connected=False):
             )
             course_elements = driver.find_elements(By.CSS_SELECTOR, "li.activity-item")
             course_list = []
+            formatted_list = []
 
             for course in course_elements:
                 try:
@@ -40,13 +41,55 @@ def get_course_list(driver=None, connected=False):
                     progress_value = course.find_element(By.CSS_SELECTOR, "div.formation-progress-value").text.strip()
 
                     formatted = f"{title.ljust(45, '.')} {percentage} ({progress_value})"
-                    course_list.append(formatted)
+                    course_list.append(title)              # ← raw
+                    formatted_list.append(formatted)       # ← formatted
+
                 except NoSuchElementException:
                     continue
-            return "\n".join(course_list)
+
+            return course_list, formatted_list  # ← return both
 
         except NoSuchElementException:
-            return "Error while fetching course list..."
+            return [], ["Error while fetching course list..."]
+
+
+def get_module_list(driver=None, course_name=None, connected=False):
+    if connected and driver is not None and course_name:
+        try:
+            if "'" in course_name:
+                parts = course_name.split("'")
+                concat_args = []
+                for i, part in enumerate(parts):
+                    if part:
+                        concat_args.append(f'"{part}"')
+                    if i < len(parts) - 1:
+                        concat_args.append("'''")
+                course_xpath_text = f"concat({', '.join(concat_args)})"
+            else:
+                course_xpath_text = f"'{course_name}'"
+
+            course_xpath = f"//span[contains(@class, 'software-title') and normalize-space(text())={course_xpath_text}]"
+
+            log.debug(f"Selected course (xpath: {course_xpath})")
+
+            course_element = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, course_xpath))
+            )
+            course_element.click()
+
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, MODULE_CARD_LIST))
+            )
+
+            # a refaire à partir d'ici
+            modules = driver.find_elements(By.XPATH, MODULE_CARD_LIST)
+            module_list = [m.find_element(By.CSS_SELECTOR, "h3.card-title").text.strip()
+                           for m in modules if m.text.strip()]
+            return "\n".join(module_list)
+
+        except NoSuchElementException:
+            return "Error while fetching modules list..."
+
 
 def get_user_name(driver=None, connected=False):
     if connected and driver is not None:

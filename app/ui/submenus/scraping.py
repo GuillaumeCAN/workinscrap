@@ -21,12 +21,12 @@ from prompt_toolkit.widgets import Frame
 import time
 import threading
 
-from app import scrap, log
+from app import scrap, log, get_user
 from app.scrap import api_key_status
 
 def scraping(driver=None, connected=False):
-    # Récupère la liste des cours
-    courses = scrap.get_courses(driver, connected).split("\n")
+    raw_courses, formatted_courses = scrap.get_courses(driver, connected)
+    courses = formatted_courses
     nonlocal_vars = {"selected": 0}
 
     def get_menu_text():
@@ -50,25 +50,19 @@ def scraping(driver=None, connected=False):
     status_control = FormattedTextControl(scrap.get_status_text)
     warn_status_text = FormattedTextControl(scrap.warn_status_text)
     api_key_status = FormattedTextControl(scrap.api_key_status)
-    courses_list = FormattedTextControl(scrap.get_courses(driver, connected))
     log_control = FormattedTextControl(log.get_log_text)
 
-    # Fenêtres inchangées
     menu_window = Window(content=menu_control, always_hide_cursor=True)
     api_key_window = Window(content=api_key_status, always_hide_cursor=True)
     status_window = Window(height=1, content=status_control)
     warn_status_window = Window(height=2, content=warn_status_text)
-    courses_window = Window(content=courses_list, always_hide_cursor=True)
     log_window = Window(content=log_control, wrap_lines=True)
     log_frame = VSplit([Window(width=4, char=" "), Frame(body=log_window, title="📑 LOGS", style="class:frame")])
 
-    # Conteneur racine inchangé
     root_container = HSplit([
         status_window,
         warn_status_window,
         api_key_window,
-        Window(height=1, char=" "),
-        VSplit([Window(width=4, char=" "), courses_window]),
         Window(height=1, char=" "),
         log_frame,
         Window(height=1, char=" "),
@@ -92,12 +86,12 @@ def scraping(driver=None, connected=False):
     @kb.add("enter")
     def enter(event):
         choice = nonlocal_vars["selected"]
-        if choice == len(courses):  # Retour au menu principal
+        if choice == len(courses):
             event.app.exit(result=None)
         else:
-            course_name = courses[choice]
-            log.info(f"Starting scraping for: {course_name}")
-            scrap.start_scraping(driver, [course_name])
+            course_name = raw_courses[choice]
+            modules = get_user.get_module_list(driver, course_name, connected)
+            log.info(f"Module list : {modules}")
             menu_control.text = get_menu_text()
             event.app.invalidate()
 
@@ -134,5 +128,3 @@ def scraping(driver=None, connected=False):
 
     result = app.run()
     return result
-
-

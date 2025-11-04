@@ -28,14 +28,12 @@ from app.config import LOGIN_URL, USERNAME_SELECTOR, PASSWORD_SELECTOR, SUBMIT_B
 
 
 def start_browser():
-    # Crée un profil temporaire Firefox isolé
     profile_dir = tempfile.mkdtemp(prefix="workinscrap_firefox_")
     options = Options()
     options.headless = True  # headless
     options.add_argument("-profile")
     options.add_argument(profile_dir)
 
-    # Supprime les logs inutiles de GeckoDriver
     service = Service(log_path=os.devnull)
 
     driver = webdriver.Firefox(service=service, options=options)
