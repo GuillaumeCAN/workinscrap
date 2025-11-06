@@ -22,7 +22,7 @@ import time
 import threading
 
 from app import scrap, log, get_user
-from app.scrap import api_key_status
+from app.scrap import api_key_status, start_scraping
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings
@@ -178,7 +178,7 @@ def scraping(driver=None, connected=False):
                 event.app.invalidate()
             else:
                 selected_module = modules[choice]
-                log.info(f"Selected module: {selected_module}")
+                scrap.toggle_scraping(driver, selected_module)
             event.app.invalidate()
         else:
             choice = nonlocal_vars["selected"]

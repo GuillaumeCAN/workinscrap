@@ -53,28 +53,27 @@ def get_courses(driver=None, connected=False):
     courses = get_course_list(driver, connected)
     return courses
 
-def toggle_scraping(driver=None):
+def toggle_scraping(driver=None, selected_module=None):
     global scraping_status
     if not scraping_status:
         scraping_status = True
-        scraping_thread = threading.Thread(target=start_scraping, args=(driver,), daemon=True)
+        scraping_thread = threading.Thread(target=start_scraping, args=(driver, selected_module), daemon=True)
         scraping_thread.start()
     else:
         scraping_status = False
 
-def start_scraping(driver):
+def start_scraping(driver, module):
     global scraping_status
-    log.debug("Scraping thread started...")
+    log.info(f"Scraping thread started for : {module}")
 
     try:
         while scraping_status:
             try:
-                log.info("Scraping...")
+                log.debug("Scraping...")
                 # scraping logic
                 time.sleep(5)
             except Exception as e:
                 log.error(f"[SCRAP] Error during scraping loop: {e}")
     finally:
         log.debug("Scraping thread stopped.")
-
 
