@@ -71,23 +71,23 @@ def scraping(driver=None, connected=False):
         course_name = nonlocal_vars["current_course"] or "Unknown course"
         result = []
 
-        # En-tête du menu modules
+        # module title
         result.append(("class:title", f"\n📘 Modules for : {course_name}\n"))
         result.append(
             ("class:disabled", "================================================================================\n\n"))
 
-        # Liste des modules
+        # modules list
         for i, mod in enumerate(modules):
             style = "class:selected" if i == nonlocal_vars["selected"] else "class:menu"
             prefix = "> " if i == nonlocal_vars["selected"] else "  "
             result.append((style, f"  {prefix}{mod}\n"))
 
-        # Ligne vide + séparateur + ligne vide
+        # empty line
         result.append(("class:menu", "\n"))
         result.append(("class:disabled", "  ────────────────────────────\n"))
         result.append(("class:menu", "\n"))
 
-        # Bouton de retour
+        # back btn
         idx_return = len(modules)
         style = "class:selected" if nonlocal_vars["selected"] == idx_return else "class:menu"
         result.append((style, f"  {'> ' if nonlocal_vars['selected'] == idx_return else '  '}Back to Courses Menu\n"))
@@ -163,7 +163,7 @@ def scraping(driver=None, connected=False):
                     )
                     back_btn.click()
 
-                    # attendre que la liste des cours réapparaisse
+                    # wait course list
                     WebDriverWait(driver, 10).until(
                         EC.presence_of_element_located((By.XPATH, COURSE_LIST_UL))
                     )
@@ -171,7 +171,7 @@ def scraping(driver=None, connected=False):
                 except Exception as e:
                     log.error(f"Could not click BACK_TO_COURSE button: {e}")
 
-                # revenir au menu des cours dans le terminal
+                # back to course menu
                 nonlocal_vars["in_modules_menu"] = False
                 nonlocal_vars["selected"] = 0
                 menu_control.text = get_courses_text()
