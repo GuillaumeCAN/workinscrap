@@ -46,7 +46,13 @@ from app.scrap import api_key_status
 def scraping(driver=None, connected=False):
     raw_courses, formatted_courses = scrap.get_courses(driver, connected)
     courses = formatted_courses
-    nonlocal_vars = {"selected": 0, "in_modules_menu": False, "current_modules": [], "current_course": None}
+    nonlocal_vars = {"selected": 0,
+                     "in_modules_menu": False,
+                     "in_module_actions_menu": False,
+                     "current_modules": [],
+                     "current_course": None,
+                     "current_module": None,
+                     }
 
     # ───────────────────────────────────────────────────────────────
     #  courses menu function
@@ -95,6 +101,28 @@ def scraping(driver=None, connected=False):
         return result
 
     # ───────────────────────────────────────────────────────────────
+    #  module actions menu function
+    # ───────────────────────────────────────────────────────────────
+    def get_module_actions_text():
+        module_name = nonlocal_vars["current_module"] or "Unknown module"
+        result = []
+        result.append(("class:title", f"\n🧩 Selected module : {module_name}\n"))
+        result.append(
+            ("class:disabled", "================================================================================\n\n"))
+
+        # 🟢 Dynamic button label depending on scraping status
+        if scrap.is_scraping():
+            actions = ["Stop scraping", "Back to Module List"]
+        else:
+            actions = ["Start scraping", "Back to Module List"]
+
+        for i, act in enumerate(actions):
+            style = "class:selected" if i == nonlocal_vars["selected"] else "class:menu"
+            prefix = "> " if i == nonlocal_vars["selected"] else "  "
+            result.append((style, f"  {prefix}{act}\n"))
+        return result
+
+    # ───────────────────────────────────────────────────────────────
     #  Share UI
     # ───────────────────────────────────────────────────────────────
     menu_control = FormattedTextControl(get_courses_text)
@@ -127,7 +155,10 @@ def scraping(driver=None, connected=False):
 
     @kb.add("up")
     def up(event):
-        if nonlocal_vars["in_modules_menu"]:
+        if nonlocal_vars["in_module_actions_menu"]:
+            nonlocal_vars["selected"] = (nonlocal_vars["selected"] - 1) % 2
+            menu_control.text = get_module_actions_text()
+        elif nonlocal_vars["in_modules_menu"]:
             modules = nonlocal_vars["current_modules"]
             nonlocal_vars["selected"] = (nonlocal_vars["selected"] - 1) % (len(modules) + 1)
             menu_control.text = get_modules_text()
@@ -138,7 +169,10 @@ def scraping(driver=None, connected=False):
 
     @kb.add("down")
     def down(event):
-        if nonlocal_vars["in_modules_menu"]:
+        if nonlocal_vars["in_module_actions_menu"]:
+            nonlocal_vars["selected"] = (nonlocal_vars["selected"] + 1) % 2
+            menu_control.text = get_module_actions_text()
+        elif nonlocal_vars["in_modules_menu"]:
             modules = nonlocal_vars["current_modules"]
             nonlocal_vars["selected"] = (nonlocal_vars["selected"] + 1) % (len(modules) + 1)
             menu_control.text = get_modules_text()
@@ -149,55 +183,69 @@ def scraping(driver=None, connected=False):
 
     @kb.add("enter")
     def enter(event):
+        # ─────────── MODULE ACTIONS MENU ───────────
+        if nonlocal_vars["in_module_actions_menu"]:
+            choice = nonlocal_vars["selected"]
+            if choice == 0:
+                # Start scraping
+                selected_module = nonlocal_vars["current_module"]
+                scrap.toggle_scraping(driver, selected_module)
+                menu_control.text = get_module_actions_text()
+            else:
+                # Back to module list
+                nonlocal_vars["in_module_actions_menu"] = False
+                nonlocal_vars["selected"] = 0
+                menu_control.text = get_modules_text()
+            event.app.invalidate()
+            return
+
+        # ─────────── MODULES MENU ───────────
         if nonlocal_vars["in_modules_menu"]:
             modules = nonlocal_vars["current_modules"]
             choice = nonlocal_vars["selected"]
             if choice == len(modules):
-
-                # back to course btn
-
                 try:
                     log.info("Returning to course list...")
                     back_btn = WebDriverWait(driver, 5).until(
                         EC.element_to_be_clickable((By.XPATH, BACK_TO_COURSE_BTN))
                     )
                     back_btn.click()
-
-                    # wait course list
                     WebDriverWait(driver, 10).until(
                         EC.presence_of_element_located((By.XPATH, COURSE_LIST_UL))
                     )
                     log.info("Course list reloaded successfully.")
                 except Exception as e:
                     log.error(f"Could not click BACK_TO_COURSE button: {e}")
-
-                # back to course menu
                 nonlocal_vars["in_modules_menu"] = False
                 nonlocal_vars["selected"] = 0
                 menu_control.text = get_courses_text()
-                event.app.invalidate()
             else:
                 selected_module = modules[choice]
-                scrap.toggle_scraping(driver, selected_module)
-            event.app.invalidate()
-        else:
-            choice = nonlocal_vars["selected"]
-            if choice == len(courses):
-                event.app.exit(result=None)
-            else:
-                course_name = raw_courses[choice]
-                log.info(f"Fetching modules for {course_name}...")
-                modules = get_user.get_module_list(driver, course_name, connected)
-                if not modules:
-                    log.warn(f"No modules found for {course_name}")
-                    return
-
-                nonlocal_vars["current_modules"] = modules
-                nonlocal_vars["current_course"] = course_name
-                nonlocal_vars["in_modules_menu"] = True
+                nonlocal_vars["current_module"] = selected_module
+                nonlocal_vars["in_module_actions_menu"] = True
                 nonlocal_vars["selected"] = 0
-                menu_control.text = get_modules_text()
+                menu_control.text = get_module_actions_text()
             event.app.invalidate()
+            return
+
+        # ─────────── COURSES MENU ───────────
+        choice = nonlocal_vars["selected"]
+        if choice == len(courses):
+            event.app.exit(result=None)
+        else:
+            course_name = raw_courses[choice]
+            log.info(f"Fetching modules for {course_name}...")
+            modules = get_user.get_module_list(driver, course_name, connected)
+            if not modules:
+                log.warn(f"No modules found for {course_name}")
+                return
+
+            nonlocal_vars["current_modules"] = modules
+            nonlocal_vars["current_course"] = course_name
+            nonlocal_vars["in_modules_menu"] = True
+            nonlocal_vars["selected"] = 0
+            menu_control.text = get_modules_text()
+        event.app.invalidate()
 
     # ───────────────────────────────────────────────────────────────
     #  style & app

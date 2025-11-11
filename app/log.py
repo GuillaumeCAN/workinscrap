@@ -9,6 +9,8 @@ MAX_LOG_LINES = 200
 def info(msg): log(msg, level="INFO")
 def debug(msg): log(msg, level="DEBUG")
 def error(msg): log(msg, level="ERROR")
+def scrap(msg): log(msg, level="SCRAP")
+def warn(msg): log(msg, level="WARNING")
 
 def set_log_callback(callback):
     global _log_callback
@@ -21,8 +23,14 @@ def log(message, level="INFO"):
     if level == "ERROR":
         color = "ansired"
 
+    elif level == "WARNING":
+        color = "yellow"
+
     elif level == "DEBUG":
         color = "ansiblue"
+
+    elif level == "SCRAP":
+        color = "purple"
 
     else:
         color = "ansigreen"
