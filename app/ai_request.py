@@ -6,6 +6,7 @@ genai.configure(api_key=config.API_KEY)
 
 def ask_gemini(question, choices):
     prompt = f"""
+                Tu es un expert en cybersécurité avec beaucoup d'experience.
                 Voici une question de QCM de cybersécurité :
                 Question : {question}
                 Choix possibles : {choices}
@@ -13,7 +14,6 @@ def ask_gemini(question, choices):
                 """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
-    log.info(prompt)
     response = model.generate_content(prompt)
 
     return response.text.strip()

@@ -12,7 +12,6 @@
 # ==============================================================================
 
 from rich.console import Console
-from selenium.webdriver.common.devtools.v137.fetch import fail_request
 
 from app.get_user import get_course_list
 import app.ai_request as ai_request
@@ -67,7 +66,6 @@ def toggle_scraping(driver=None, selected_module=None):
         scraping_thread.start()
     else:
         scraping_status = False
-        driver.back()
 
 def start_scraping(driver, module):
     global scraping_status
@@ -128,7 +126,7 @@ def start_scraping(driver, module):
 
             try:
                 WebDriverWait(driver, 5).until(EC.element_to_be_clickable(access_link))
-                access_link.click()
+                driver.execute_script("arguments[0].click();", access_link)
                 log.scrap("Entered module successfully.")
 
             except Exception as e:
@@ -149,7 +147,7 @@ def start_scraping(driver, module):
         log.info("Scraping thread stopped.")
 
 
-
+#TODO : fix the click on the finish button at the end of MQC
 
 
 def solve_qcm(driver):
@@ -158,7 +156,22 @@ def solve_qcm(driver):
         log.debug("🔁 Start of the MCQ loop...")
 
         while True:
+            try:
+                time.sleep(1)
+                log.debug("Trying to fetch end MQC")
+                end_btn = driver.find_element((By.XPATH, "/html/body/div/div/div/main/section/div/div/div[1]/div[2]/button[2]/span[2]"))
+                if end_btn.is_displayed():
+                    log.debug("End of MQC detected")
+                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", end_btn)
+                    time.sleep(0.5)
+                    driver.execute_script("arguments[0].click();", end_btn)
+                    log.scrap("Fetching the result...")
+                    break
+            except Exception:
+                pass
+
             # Wait for a question to be displayed
+            time.sleep(1)
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//div[contains(@class,'question')]//p | //h3"))
             )
@@ -224,41 +237,21 @@ def solve_qcm(driver):
                 log.debug("New question detected.")
                 question_index += 1
                 continue
+
             except Exception:
-                log.scrap("✅ End of MCQ detected (no more questions).")
+                log.error("No question detected and no finish button detected either... exiting scrap")
                 break
 
-        # Final step: click the "Finish" button
+
+        #RESULT
         try:
-            log.debug("Looking for the 'Finish' button...")
-
-            # Try several possible selectors
-            possible_end_btns = [
-                "//button[.//span[contains(translate(text(),'TERMINER','terminer'),'terminer')]]",
-                "//button[contains(translate(text(),'TERMINER','terminer'),'terminer')]",
-                "//span[contains(text(),'Terminer')]/ancestor::button",
-            ]
-
-            end_btn = None
-            for selector in possible_end_btns:
-                try:
-                    end_btn = WebDriverWait(driver, 5).until(
-                        EC.element_to_be_clickable((By.XPATH, selector))
-                    )
-                    if end_btn:
-                        break
-                except Exception:
-                    continue
-
-            if not end_btn:
-                raise Exception("The 'Finish' button could not be found on the page.")
-
-            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", end_btn)
-            time.sleep(0.5)
-            end_btn.click()
-            log.scrap("🏁 'Finish' button successfully clicked — redirection to the results page.")
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "score__value"))
+            )
+            score = driver.find_element(By.CLASS_NAME, "score__value").text.strip()
+            log.info(f"Score : {score}")
         except Exception as e:
-            log.warn(f"⚠️ Unable to click the 'Finish' button : {e}")
+            log.error(f"Unable to fetch score: {e}")
 
 
     except Exception as e:
@@ -279,9 +272,16 @@ def complete_module_exercises(driver, module_name):
         WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CLASS_NAME, "exercise-card"))
         )
-        exercise_cards = driver.find_elements(By.CLASS_NAME, "exercise-card")
+        all_exercise_cards = driver.find_elements(By.CLASS_NAME, "exercise-card")
 
-        log.scrap(f"{len(exercise_cards)} exercises found in module {module_name}")
+        # filter non-done exercise
+        exercise_cards = [
+            card for card in all_exercise_cards
+            if "is-done" not in card.get_attribute("class")
+        ]
+
+        log.scrap(f"{len(exercise_cards)} incomplete exercises found in module '{module_name}' "
+                  f"(out of {len(all_exercise_cards)} total).")
 
         for i, card in enumerate(exercise_cards, start=1):
             try:
@@ -293,27 +293,23 @@ def complete_module_exercises(driver, module_name):
                 access_link = card.find_element(By.XPATH, ".//a[contains(@class,'exercise-card-link')]")
                 driver.execute_script("arguments[0].scrollIntoView(true);", access_link)
                 time.sleep(0.5)
-
                 driver.execute_script("arguments[0].click();", access_link)
-                log.scrap(f"Access to exercise {title} successfully.")
+                log.scrap(f"Access to exercise '{title}' successfully.")
 
-                #ACCESS QCM
+                # ACCESS QCM
                 try:
                     log.debug("Waiting for QCM card to appear...")
 
-                    # Wait for the block containing the MCQ button
                     WebDriverWait(driver, 15).until(
                         EC.presence_of_element_located((By.ID, "mcq-cta-card"))
                     )
-                    time.sleep(1)  # petit délai pour laisser le JS finir de charger
+                    time.sleep(1)
 
-                    # Check if there is an iframe
                     iframes = driver.find_elements(By.TAG_NAME, "iframe")
                     if iframes:
                         driver.switch_to.frame(iframes[0])
                         log.debug("Switched into iframe containing QCM button.")
 
-                    # Try several possible selectors for the button
                     possible_selectors = [
                         "//button[.//span[contains(translate(text(), 'ACCEDER AU QCM', 'acceder au qcm'),'acceder au qcm')]]",
                         "//span[contains(text(), 'Accéder au QCM')]/ancestor::button",
@@ -337,16 +333,13 @@ def complete_module_exercises(driver, module_name):
                     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", qcm_button)
                     time.sleep(0.8)
                     driver.execute_script("arguments[0].click();", qcm_button)
+                    log.scrap(f"Clicked 'Access the quiz' button for: {title}")
 
-                    log.scrap(f"Clicking the 'Access the quiz' button : {title}")
-
-                    # Exit the iframe if necessary
                     try:
                         driver.switch_to.default_content()
                     except Exception:
                         pass
 
-                    # Wait for the MCQ to load
                     WebDriverWait(driver, 10).until(
                         EC.presence_of_element_located((By.XPATH, "//button[contains(.,'Valider')] | //form"))
                     )
@@ -355,20 +348,22 @@ def complete_module_exercises(driver, module_name):
                         EC.presence_of_element_located((By.XPATH, "/html/body/div/div/div/main/section/div/div/div[1]/div[2]/button"))
                     )
                     begin_btn = driver.find_element(By.XPATH, "/html/body/div/div/div/main/section/div/div/div[1]/div[2]/button")
-                    begin_btn.click()
+                    driver.execute_script("arguments[0].click();", begin_btn)
                     log.scrap(f"Multiple-choice questions loaded for: {title}")
 
-                    #QCM SOLVER
+                    # QCM SOLVER
                     solve_qcm(driver)
+                    toggle_scraping(driver)
 
                 except Exception as e:
                     log.warn(f"Unable to access the multiple-choice quiz for {title} : {e}")
 
-
             except Exception as e:
+                # log.warn(f"Error processing exercise {i}: {e}")
                 continue
 
-        log.info(f"All exercises in '{module_name}' successfully scraped and completed. ✅")
+        # log.info(f"✅ All incomplete exercises in '{module_name}' have been processed.")
 
     except Exception as e:
         log.error(f"Error while scraping exercises : {e}")
+

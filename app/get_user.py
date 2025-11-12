@@ -73,16 +73,17 @@ def get_module_list(driver=None, course_name=None, connected=False):
                 EC.presence_of_element_located((By.CLASS_NAME, "card-body"))
             )
             module_elements = driver.find_elements(By.CLASS_NAME, "card-body")
-            module_list = []
+            modules = []
 
             for module in module_elements:
                 try:
                     title = module.find_element(By.CSS_SELECTOR, "h3.card-title").text.strip()
-                    module_list.append(title)
+                    modules.append(title)
+
                 except NoSuchElementException:
                     continue
 
-            return module_list
+            return modules
 
         except NoSuchElementException:
             return "Error while fetching modules list..."
@@ -135,12 +136,10 @@ def is_api_key_valid():
         return False
 
 def escape_xpath_text(text: str) -> str:
-    """Retourne une version XPath-safe du texte, compatible avec les apostrophes et guillemets."""
     if "'" not in text:
         return f"'{text}'"
     elif '"' not in text:
         return f'"{text}"'
     else:
-        # Si les deux types de guillemets sont présents, on utilise concat()
         parts = text.split("'")
         return "concat(" + ", \"'\", ".join(f"'{part}'" for part in parts) + ")"
