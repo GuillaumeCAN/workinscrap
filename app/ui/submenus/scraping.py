@@ -236,4 +236,3 @@ def scraping(driver=None, connected=False):
 
     result = app.run()
     return result
-

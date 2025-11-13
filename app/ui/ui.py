@@ -32,7 +32,6 @@ def show_title(driver=None, connected=False):
     console.print(Padding(f"[italic white]Coded by {AUTHOR}[/italic white]", (0, 0, 0, 4)))
     console.print(Padding(f"[italic cyan]Why study, when you can scrape? - {APP_NAME} v{VERSION}[/italic cyan]", (0, 0, 0, 6)))
 
-
     if connected and driver is not None:
         try:
             user_name = get_user_name(driver, connected)

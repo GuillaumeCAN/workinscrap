@@ -147,18 +147,14 @@ def start_scraping(driver, module):
         log.info("Scraping thread stopped.")
 
 
-#TODO : fix the click on the finish button at the end of MQC
-
-
 def solve_qcm(driver):
     try:
         question_index = 1
         log.debug("🔁 Start of the MCQ loop...")
 
         while True:
-            # ✅ Vérifie la présence du bouton de fin
+            # trying end_btn
             try:
-                # 🕒 On attend jusqu'à 5 secondes que le bouton "Terminer le QCM" soit visible
                 end_btn = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (By.XPATH, "//button[.//span[contains(normalize-space(.), 'Terminer le QCM')]]")
@@ -167,7 +163,7 @@ def solve_qcm(driver):
                 driver.execute_script("arguments[0].scrollIntoView({block:'center'});", end_btn)
                 time.sleep(0.4)
 
-                # parfois le click direct échoue => clic via JS
+                # JS safety
                 driver.execute_script("arguments[0].click();", end_btn)
                 log.scrap("MQC ending. Fetching result...")
                 break
@@ -270,7 +266,7 @@ def solve_qcm(driver):
         except Exception as e:
             log.error(f"Unable to quit result: {e}")
 
-
+        #QUIT MODULE
         try:
             return_to_module = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
@@ -282,19 +278,8 @@ def solve_qcm(driver):
         except Exception as e:
             log.error(f"Unable to fetch quit button: {e}")
 
-
-
-
     except Exception as e:
         log.error(f"[QCM] Error inside solve_qcm : {e}")
-
-
-
-
-
-
-
-
 
 
 def complete_module_exercises(driver, module_name):
@@ -316,20 +301,21 @@ def complete_module_exercises(driver, module_name):
 
         for i in range(len(exercise_cards)):
             try:
-                # ✅ Rafraîchir les cartes à chaque itération pour éviter stale elements
+                # refresh card-list
                 WebDriverWait(driver, 10).until(
                     EC.presence_of_all_elements_located((By.CLASS_NAME, "exercise-card"))
                 )
                 all_exercise_cards = driver.find_elements(By.CLASS_NAME, "exercise-card")
 
-                # on refiltre à chaque fois (pour exclure ceux déjà complétés)
+                # filter is-done
                 exercise_cards = [
                     c for c in all_exercise_cards
                     if "is-done" not in c.get_attribute("class")
                 ]
 
                 if i >= len(exercise_cards):
-                    log.scrap("🚀 Tous les exercices ont été mis à jour ou terminés.")
+                    log.scrap("🚀 All exercises have been updated or completed!")
+                    toggle_scraping(driver)
                     break
 
                 card = exercise_cards[i]
@@ -337,14 +323,14 @@ def complete_module_exercises(driver, module_name):
                 title = title_elem.text.strip()
                 log.scrap(f"→ Exercise {i + 1}: {title}")
 
-                # 🧭 accès à l’exercice
+                # access to exercise
                 access_link = card.find_element(By.XPATH, ".//a[contains(@class,'exercise-card-link')]")
                 driver.execute_script("arguments[0].scrollIntoView(true);", access_link)
                 time.sleep(0.5)
                 driver.execute_script("arguments[0].click();", access_link)
                 log.scrap(f"Access to exercise '{title}' successfully.")
 
-                # 🧠 accès au QCM
+                # access to mqc
                 try:
                     log.debug("Waiting for QCM card to appear...")
                     WebDriverWait(driver, 15).until(
@@ -396,7 +382,7 @@ def complete_module_exercises(driver, module_name):
                     driver.execute_script("arguments[0].click();", begin_btn)
                     log.scrap(f"Multiple-choice questions loaded for: {title}")
 
-                    # 🚀 Résolution du QCM
+                    # mqc solver
                     solve_qcm(driver)
 
                 except Exception as e:
@@ -411,4 +397,3 @@ def complete_module_exercises(driver, module_name):
 
     except Exception as e:
         log.error(f"Error while scraping exercises : {e}")
-

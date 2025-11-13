@@ -11,10 +11,6 @@
 #  © Guillaume CANCALON – All rights reserved.
 # ==============================================================================
 
-# ==============================================================================
-#  browser.py - Selenium Firefox launcher with clean logs
-# ==============================================================================
-
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
@@ -25,7 +21,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from app.config import LOGIN_URL, USERNAME_SELECTOR, PASSWORD_SELECTOR, SUBMIT_BUTTON_SELECTOR, SUCCESS_ELEMENT_SELECTOR
-
 
 def start_browser():
     profile_dir = tempfile.mkdtemp(prefix="workinscrap_firefox_")
