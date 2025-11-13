@@ -11,7 +11,7 @@ This project's sole purpose is to improve programming and web scraping skills. I
 
 Best regards - **Abraxas**
 
-![logo](https://i.ibb.co/vxgVMQD5/logo.png)
+![logo](app/ui/logo.png)
 
 ## Features
 
@@ -62,7 +62,7 @@ python3 main.py
 
 
 ## Configuration
-To make sure you can fully use WorkinScrap, you will have to set your Gemini API key in the `config.py:
+To make sure you can fully use WorkinScrap, you will have to set your Gemini API key in the `config.py:`
 
 ```python
 APP_NAME = "WorkinScrap"  
