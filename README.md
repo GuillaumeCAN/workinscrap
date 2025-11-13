@@ -2,7 +2,7 @@
 
 A small Python tool to automate scraping data from WorkinLive and filling MQC forms. Designed and developed by **Abraxas**.
 
-![Install guide][#Installation]
+[Install guide](#Installation)
 
 ## DISCLAIMER
 WorkinScrap is an application designed for an educational purpose only!
@@ -11,7 +11,7 @@ This project's sole purpose is to improve programming and web scraping skills. I
 
 Best regards - **Abraxas**
 
-![logo](https://i.ibb.co/7J36Ch6X/logo.png)
+![logo](https://i.ibb.co/vxgVMQD5/logo.png)
 
 ## Features
 
@@ -25,7 +25,7 @@ This project is coded in Python 3.12 and uses Selenium as well as API requests t
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.12+
 - pip
 - A browser driver (e.g., chromedriver, firefox)
 
@@ -47,7 +47,7 @@ First you need to download the project by downloading the last release or :
 git clone git@github.com:GuillaumeCAN/workinscrap.git
 ```
 
-Go to the project's directory and install all the necessary lib :
+Go to the project's directory and install all the necessary libs :
 
 ```
 pip install -r requirements.txt
@@ -101,7 +101,7 @@ You can navigate through the different menus using the arrow keys. Sometimes the
 
 Sometimes, even Gemini cannot get a full correct score while completing MQC... So don't be afraid if you get 4/5, this is just the proof that WorkinLive is shit.
 
-![main-menu.png](https://i.ibb.co/20bxb3G4/Capture-d-cran-2025-11-13-121638.png)
+![main-menu.png](app/ui/screenshot.png)
 
 ## Logging & Output
 
