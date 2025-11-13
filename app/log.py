@@ -30,7 +30,7 @@ def log(message, level="INFO"):
         color = "ansiblue"
 
     elif level == "SCRAP":
-        color = "purple"
+        color = "ansimagenta"
 
     else:
         color = "ansigreen"

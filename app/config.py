@@ -1,5 +1,5 @@
 APP_NAME = "WorkinScrap"
-AUTHOR = "blizzarr"
+AUTHOR = "Abraxas"
 VERSION = "1.0.3"
 
 GITHUB_REPO = "https://github.com/GuillaumeCAN/workinscrap"

@@ -25,12 +25,12 @@ from app.idle import is_idling
 console = Console()
 
 def show_title(driver=None, connected=False):
-    f = Figlet(font="slant")
+    f = Figlet(font="small")
     ascii_art = f.renderText(APP_NAME)
     console.clear()
     console.print(f"[bold cyan]{ascii_art}[/bold cyan]")
     console.print(Padding(f"[italic white]Coded by {AUTHOR}[/italic white]", (0, 0, 0, 4)))
-    console.print(Padding(f"\n[italic cyan]Why study, when you can scrape? - {APP_NAME} v{VERSION}[/italic cyan]\n", (0, 0, 0, 6)))
+    console.print(Padding(f"[italic cyan]Why study, when you can scrape? - {APP_NAME} v{VERSION}[/italic cyan]", (0, 0, 0, 6)))
 
 
     if connected and driver is not None:
