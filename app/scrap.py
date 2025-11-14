@@ -8,7 +8,7 @@
 #  or any other unethical activities. It is provided solely for learning and
 #  research purposes.
 #
-#  © Guillaume CANCALON – All rights reserved.
+#  © Abraxas – All rights reserved.
 # ==============================================================================
 
 from rich.console import Console
@@ -145,6 +145,18 @@ def start_scraping(driver, module):
 
     finally:
         log.info("Scraping thread stopped.")
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.ID, "back-btn")
+                )
+            )
+            back_to_module_btn = driver.find_element(By.ID, "back-btn")
+            driver.execute_script("arguments[0].click();", back_to_module_btn)
+            log.debug("Returned to module list successfully.")
+
+        except Exception as e:
+            log.error("Unable to return to module list.")
 
 
 def solve_qcm(driver):

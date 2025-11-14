@@ -101,6 +101,11 @@ You can navigate through the different menus using the arrow keys. Sometimes the
 
 Sometimes, even Gemini cannot get a full correct score while completing MQC... So don't be afraid if you get 4/5, this is just the proof that WorkinLive is shit.
 
+Do not forget that Gemini API provide a maximum of 10 requests per minute if you are using the free version.
+To create your API key go to [AI Google studio](https://aistudio.google.com/api-keys)
+
+You can always increase this limit by adding billing to your account or by using your student pass to upgrade your plan.
+
 ![main-menu.png](app/ui/screenshot.png)
 
 ## Logging & Output

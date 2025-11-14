@@ -5,6 +5,7 @@ VERSION = "1.0.3"
 GITHUB_REPO = "https://github.com/GuillaumeCAN/workinscrap"
 
 LOGIN_URL = "https://www.workinlive.school/login"
+DASHBOARD_URL = "https://www.workinlive.school/"
 
 USERNAME_SELECTOR = "/html/body/div/div/div/div/div[2]/form/div[1]/div/input"
 PASSWORD_SELECTOR = "/html/body/div/div/div/div/div[2]/form/div[2]/div/input"
@@ -19,4 +20,4 @@ COURSE_LIST_UL = "/html/body/div/div/div/main/section/div/div/div/div[1]/div/ul"
 MODULE_CARD_LIST = "/html/body/div/div/div/main/section/div/div"
 BACK_TO_COURSE_BTN = "/html/body/div/div/header/div[1]/button/span[1]"
 
-API_KEY = "AIzaSyAtmI822ttw6a27-FxWTfgS8yXBtWMB1bw"
+API_KEY = ""

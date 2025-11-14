@@ -8,7 +8,7 @@
 #  or any other unethical activities. It is provided solely for learning and
 #  research purposes.
 #
-#  © Guillaume CANCALON – All rights reserved.
+#  © Abraxas – All rights reserved.
 # ==============================================================================
 
 import requests
@@ -78,6 +78,7 @@ def get_module_list(driver=None, course_name=None, connected=False):
             for module in module_elements:
                 try:
                     title = module.find_element(By.CSS_SELECTOR, "h3.card-title").text.strip()
+                    success = module.find_element
                     modules.append(title)
 
                 except NoSuchElementException:

@@ -8,7 +8,7 @@
 #  or any other unethical activities. It is provided solely for learning and
 #  research purposes.
 #
-#  © Guillaume CANCALON – All rights reserved.
+#  © Abraxas – All rights reserved.
 # ==============================================================================
 
 from prompt_toolkit.application import Application
@@ -36,7 +36,7 @@ import threading
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from app.config import BACK_TO_COURSE_BTN, COURSE_LIST_UL
+from app.config import DASHBOARD_URL, COURSE_LIST_UL
 
 
 from app import scrap, log, get_user
@@ -158,10 +158,7 @@ def scraping(driver=None, connected=False):
 
                 try:
                     log.info("Returning to course list...")
-                    back_btn = WebDriverWait(driver, 5).until(
-                        EC.element_to_be_clickable((By.XPATH, BACK_TO_COURSE_BTN))
-                    )
-                    back_btn.click()
+                    driver.get(DASHBOARD_URL)
 
                     # wait course list
                     WebDriverWait(driver, 10).until(

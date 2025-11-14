@@ -8,7 +8,7 @@
 #  or any other unethical activities. It is provided solely for learning and
 #  research purposes.
 #
-#  © Guillaume CANCALON – All rights reserved.
+#  © Abraxas – All rights reserved.
 # ==============================================================================
 
 import threading
