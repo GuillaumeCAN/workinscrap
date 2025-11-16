@@ -116,7 +116,7 @@ A log window is currently visible in the script, but in a future update it may d
 
 ## Bugs and report
 
-During your trip through the script, you may encounter some bugs / crashes. Sometime it's just a one-shot bug that will no longer appear because... you know... workinlive... But sometimes its a persistent bug / crashes. In this case, feel free to report any using the Issues tab on Github, or by sending my an email with all the possible details.
+During your trip through the script, you may encounter some bugs / crashes. Sometime it's just a one-shot bug that will no longer appear because... you know... workinlive... But sometimes its a persistent bug / crashes. In this case, feel free to report any using the Issues tab on Github, or by sending me an email with all the possible details.
 
 
 ## License
